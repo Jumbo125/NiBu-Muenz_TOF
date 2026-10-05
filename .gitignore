@@ -1,0 +1,10 @@
+# Claude-/VSCode-Arbeitsdaten
+.claude/
+.vscode/
+
+# Build-/Export-Artefakt, kein Quellcode
+NiBu Muenz_TOF.zip
+
+# MicroPython/Pico Cache
+__pycache__/
+*.pyc
