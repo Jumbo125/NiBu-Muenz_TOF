@@ -692,4 +692,21 @@ def main():
         time.sleep_ms(5)
 
 
-main()
+# Falls main() mit einer unerwarteten Exception abbricht (z.B. Pin-Init-
+# Fehler), faellt der Pico sonst STILL in den REPL zurueck -- main.py
+# "laeuft" dann nicht mehr, aber es kommt auch keine Fehlermeldung über
+# USB-Serial, die ein PC-seitiges Monitoring-Tool anzeigen koennte (siehe
+# coin_debug_monitor.py: keine Zeilen mehr, nur noch der REPL-Prompt
+# ">>>"). Deshalb hier Exception abfangen, ueber USB-Serial sichtbar
+# machen und den Pico danach neu starten (machine.reset()), statt im
+# REPL haengen zu bleiben.
+try:
+    main()
+except Exception as exc:
+    try:
+        usb_send("FATAL:{}".format(exc))
+    except Exception:
+        pass
+    time.sleep(2)
+    import machine
+    machine.reset()
