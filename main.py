@@ -98,16 +98,17 @@ HX916_MAX_VALID_POINTS = 50
 # aber nie beschaltet -- UART1-TX liegt jetzt auf GP6, damit GP4 fuer den
 # COIN-Pulseingang frei ist.
 #
-# WIRING (HX-916 COIN-Pulsausgang, 2-step switch auf NO/Normally-Open):
-#   HX-916 COIN (5V-Pulsausgang) --[R1 10k]-- GP4 --[R2 20k]-- GND
-#   HX-916 GND                   -------------------------------- Pico GND
+# WIRING (tatsächlich verbaut, abweichend vom HX-916-Handbuch-Schaltplan):
+#   Pico 3V3 --[R 10k]-- GP4
+#   Muenzpruefer COIN (Open-Collector, zieht bei Impuls gegen GND) -- GP4
+#   Muenzpruefer GND -------------------------------------------------- Pico GND
 #
-#   Ruhezustand (Kontakt offen):  GP4 liegt über R2 auf GND -> LOW
-#   Impuls (Kontakt kurz zu):     Signal fliesst durch Teiler -> GP4 HIGH
-#   Vout = 5V * R2/(R1+R2) = 5V * 20k/30k = 3.33V (sicher < 3.3V-Limit)
+#   Ruhezustand (Kontakt offen):  GP4 liegt über den 10k-Pull-up auf 3V3 -> HIGH
+#   Impuls (Kontakt schliesst):   COIN-Ausgang zieht GP4 kurz gegen GND -> LOW
 #
-#   Kein Kondensator/Tiefpass -- nur die zwei Widerstände. Bei Kabelbruch
-#   bleibt GP4 dank PULL_DOWN sicher auf LOW (kein Fehl-Puls).
+#   Daher IRQ_FALLING (nicht RISING) und PULL_UP (nicht PULL_DOWN) --
+#   bei Kabelbruch/offenem COIN-Pin bleibt GP4 dank PULL_UP sicher auf
+#   HIGH (kein Fehl-Puls, da nur die fallende Flanke zählt).
 #
 # Pulsbreite am HX-916 (3-step switch) auf 100ms (slow) stellen -- robuster
 # gegen verpasste/verschluckte Flanken als 30/50ms, Geschwindigkeit spielt
@@ -526,17 +527,20 @@ def main():
     coin_buffer = b""
 
     # GP4 = Pulseingang vom Impulsgeber (siehe WIRING-Kommentar bei den
-    # Konstanten). PULL_DOWN sorgt dafuer, dass der Pin bei offenem/nicht
-    # angeschlossenem Kabel sicher auf LOW bleibt (kein Rausch-Fehlpuls).
+    # Konstanten). Externer 10k-Pull-up an 3V3 haelt GP4 im Ruhezustand
+    # auf HIGH; der Open-Collector-COIN-Ausgang zieht bei einem Impuls
+    # kurz gegen GND -> fallende Flanke zaehlt. PULL_UP sorgt zusaetzlich
+    # dafuer, dass der Pin bei offenem/nicht angeschlossenem Kabel sicher
+    # auf HIGH bleibt (kein Rausch-Fehlpuls durch IRQ_FALLING).
     #
     # Solange GP4 unbeschaltet/offen ist (Impulsgeber noch nicht verkabelt),
-    # kann der Pin trotz PULL_DOWN sporadisch floaten/stoeren -- ein IRQ,
+    # kann der Pin trotz PULL_UP sporadisch floaten/stoeren -- ein IRQ,
     # der dadurch sehr haeufig feuert, darf main.py NICHT zum Absturz
     # bringen (siehe READY/VERSION weiter unten, die sonst nie gesendet
     # werden). Deshalb hier separat abgesichert.
     try:
-        pulse_pin = Pin(PULSE_GEBER_PIN, Pin.IN, Pin.PULL_DOWN)
-        pulse_pin.irq(trigger=Pin.IRQ_RISING, handler=_pulse_geber_irq)
+        pulse_pin = Pin(PULSE_GEBER_PIN, Pin.IN, Pin.PULL_UP)
+        pulse_pin.irq(trigger=Pin.IRQ_FALLING, handler=_pulse_geber_irq)
     except Exception as exc:
         usb_send("STATUS:PULSE_GEBER=ERR:{}".format(exc))
     pulse_burst_pulses = 0
