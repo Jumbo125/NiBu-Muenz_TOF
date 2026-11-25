@@ -4,8 +4,9 @@
 # Aufgabe:
 #   - VL53L1X über I2C lesen
 #   - stabile Präsenz -> "PRESENCE" über USB-Serial senden
-#   - ST-001 über UART lesen
-#   - value:<cent> -> "COIN:<cent>" über USB-Serial senden
+#   - Münzprüfer über UART lesen (ST-001 ASCII ODER HX-916 binär,
+#     automatisch erkannt -- siehe Abschnitt MUENZPRUEFER weiter unten)
+#   - "COIN:<cent>" über USB-Serial senden
 #
 # WICHTIG:
 #   Der Pico führt KEIN Guthaben. Jede Münze wird einzeln an den PC gemeldet.
@@ -53,18 +54,42 @@ RELEASE_DISTANCE_MM = 3400        # Hysterese: erst ab 3,4 m wieder freigeben
 PRESENCE_STABLE_MS = 500          # muss 0,5 s stabil erkannt werden
 RELEASE_STABLE_MS = 1000          # muss 1,0 s wieder frei sein
 
-# ST-001 / UART1
+# Münzprüfer / UART1 (ST-001 ODER HX-916 -- gleiche Verkabelung/Baudrate,
+# welches Modell angeschlossen ist, erkennt die Firmware automatisch am
+# Byteformat, siehe Abschnitt MUENZPRUEFER weiter unten)
 ST_UART_ID = 1
 ST_UART_BAUD = 115200
 ST_UART_TX_PIN = 4       # GP4; wird nicht angeschlossen
-ST_UART_RX_PIN = 5       # GP5; ST-001 TX kommt hierhin
+ST_UART_RX_PIN = 5       # GP5; TX des Münzprüfers kommt hierhin
 ST_MAX_LINE_BYTES = 256
+
+# HX-916 Multi-Coin-Selector (Alternative zum ST-001, laut Hersteller-
+# Handbuch ebenfalls TTL/115200 an derselben UART1/GP5-Verkabelung).
+# Protokoll: 3 Rohbytes pro Münze, OHNE Zeilenende:
+#   0x48 0x58 <wert>   ("H" "X" <Punktwert>)
+# Beispiele aus dem Handbuch: 48 58 01 = 1 Punkt, 48 58 05 = 5 Punkte,
+# 48 58 0A = 10 Punkte. Der Punktwert (Pl-Parameter, Automat erlaubt 1-50)
+# wird PRO KANAL am Automaten konfiguriert und ist kein Cent-Wert direkt --
+# HX916_POINT_VALUE_CENT rechnet ihn in Cent um und MUSS zur tatsächlichen
+# Pl-Konfiguration am Automaten passen (z.B. 10-Cent-Kanal auf Pl=1,
+# 1-Euro-Kanal auf Pl=10 programmieren, wenn der Wert hier 10 ist).
+HX916_MARKER = b"HX"
+HX916_FRAME_LEN = 3
+HX916_POINT_VALUE_CENT = 10
+HX916_MIN_VALID_POINTS = 1
+HX916_MAX_VALID_POINTS = 50
 
 # PC-Identifikation
 # Der PC-Server (Windows/Linux) kann beim Durchsuchen aller seriellen
 # Schnittstellen dieses Kommando senden, um den Pico eindeutig zu erkennen.
 PC_IDENTIFY_COMMAND = "ID?"
 PC_IDENTITY_RESPONSE = "ID:TOF_Muenzzaehler"
+
+# DEBUG zur Laufzeit per USB-Serial umschaltbar (ohne Neu-Flash) -- z.B. fuer
+# kurze Vor-Ort-Diagnosen des ST-001/Muenzeinwurfs. Siehe coin_debug_monitor.py
+# --debug-on/--debug-off auf der PC-Seite.
+PC_DEBUG_ON_COMMAND = "DEBUG:ON"
+PC_DEBUG_OFF_COMMAND = "DEBUG:OFF"
 PC_CMD_MAX_CHARS = 64
 
 DEBUG = False
@@ -113,10 +138,15 @@ def process_pc_command(poll_obj, buffer):
     """
     Liest nicht-blockierend eingehende USB-Serial-Zeichen vom PC.
 
-    Aktuell wird nur ein Kommando unterstuetzt: PC_IDENTIFY_COMMAND ("ID?").
-    Damit kann der PC-Server (Windows/Linux) beim Durchsuchen aller
-    seriellen Schnittstellen erkennen, welche davon der Pico ist.
+    Unterstuetzte Kommandos:
+      - PC_IDENTIFY_COMMAND ("ID?"): PC-Server erkennt beim Durchsuchen
+        aller seriellen Schnittstellen, welche davon der Pico ist.
+      - PC_DEBUG_ON_COMMAND / PC_DEBUG_OFF_COMMAND ("DEBUG:ON"/"DEBUG:OFF"):
+        schaltet DEBUG zur Laufzeit um, ohne Neu-Flash -- fuer kurze
+        Vor-Ort-Diagnosen (z.B. rohe ST-001-UART1-Bytes sehen).
     """
+    global DEBUG
+
     while poll_obj.poll(0):
         ch = sys.stdin.read(1)
         if not ch:
@@ -127,6 +157,12 @@ def process_pc_command(poll_obj, buffer):
             buffer = ""
             if line == PC_IDENTIFY_COMMAND:
                 usb_send(PC_IDENTITY_RESPONSE)
+            elif line == PC_DEBUG_ON_COMMAND:
+                DEBUG = True
+                usb_send("DEBUG:STATE=ON")
+            elif line == PC_DEBUG_OFF_COMMAND:
+                DEBUG = False
+                usb_send("DEBUG:STATE=OFF")
             elif line:
                 debug("PC cmd ignored: {}".format(line))
         else:
@@ -138,8 +174,22 @@ def process_pc_command(poll_obj, buffer):
 
 
 # ---------------------------------------------------------------------------
-# ST-001
+# MUENZPRUEFER (ST-001 ASCII-Zeilen ODER HX-916 binäre Frames)
 # ---------------------------------------------------------------------------
+#
+# Beide Modelle hängen an derselben UART1/GP5-Verkabelung (115200 TTL) --
+# welches Modell gerade angeschlossen ist, wird NICHT konfiguriert, sondern
+# pro empfangenem Datenstück automatisch am Byteformat erkannt:
+#   - ST-001:  ASCII-Zeile "value:<cent>,frequency:<n>\n"
+#   - HX-916:  binärer 3-Byte-Frame 0x48 0x58 <punktwert>, kein Zeilenende
+#
+# Wichtig: Die beiden Formate dürfen NICHT über ein globales CR->LF-Replace
+# auf dem Gesamtpuffer vereinheitlicht werden (wie frueher für ST-001
+# allein) -- ein HX-916-Punktwert-Byte kann zufällig 0x0D (CR) sein und
+# würde sonst verfälscht. Deshalb werden Zeilenenden nur innerhalb des
+# ASCII-Zweigs erkannt (_take_line_bytes), nachdem ein HX-916-Frame am
+# Pufferanfang ausgeschlossen wurde.
+
 
 def parse_st001_line(raw_line):
     """
@@ -177,10 +227,49 @@ def parse_st001_line(raw_line):
     return value
 
 
-def process_st001_uart(uart, buffer):
+def _emit_hx916_coin(points):
     """
-    Liest alle aktuell verfügbaren UART-Daten.
-    Jede vollständige Zeile wird unabhängig verarbeitet.
+    Rechnet einen HX-916-Punktwert (1-50, siehe HX916_MAX_VALID_POINTS) über
+    HX916_POINT_VALUE_CENT in Cent um und meldet COIN:<cent>.
+    """
+    if points < HX916_MIN_VALID_POINTS or points > HX916_MAX_VALID_POINTS:
+        debug("HX916 Punktwert außerhalb Plausibilitätsbereich: {}".format(points))
+        return
+
+    value = points * HX916_POINT_VALUE_CENT
+    # Ganz wichtig: NICHT aufsummieren.
+    usb_send("COIN:{}".format(value))
+
+
+def _take_line_bytes(buffer):
+    """
+    Sucht das nächste Zeilenende (CR, LF oder CRLF) im Puffer.
+    Gibt (raw_line_ohne_terminator, rest) zurück, oder (None, buffer),
+    falls noch keine vollständige Zeile vorliegt.
+    """
+    nl_pos = buffer.find(b"\n")
+    cr_pos = buffer.find(b"\r")
+
+    if nl_pos < 0 and cr_pos < 0:
+        return None, buffer
+
+    if cr_pos < 0 or (0 <= nl_pos < cr_pos):
+        end = nl_pos
+        next_start = nl_pos + 1
+    else:
+        end = cr_pos
+        next_start = cr_pos + 1
+        if buffer[next_start:next_start + 1] == b"\n":
+            next_start += 1  # CRLF
+
+    return buffer[:end], buffer[next_start:]
+
+
+def process_coin_uart(uart, buffer):
+    """
+    Liest alle aktuell verfügbaren UART-Daten vom Münzprüfer.
+    Erkennt pro Durchlauf automatisch, ob es sich um einen ST-001-ASCII-
+    Zeilenrest oder einen HX-916-Binärframe (0x48 0x58 <wert>) handelt.
     """
     if not uart.any():
         return buffer
@@ -189,19 +278,32 @@ def process_st001_uart(uart, buffer):
     if not chunk:
         return buffer
 
-    debug("ST001 raw: {}".format(chunk))
+    debug("COIN raw: {}".format(chunk))
 
-    # CR, LF und CRLF robust behandeln.
-    chunk = chunk.replace(b"\r", b"\n")
     buffer += chunk
 
-    # Schutz gegen kaputte/nie abgeschlossene UART-Zeilen.
+    # Schutz gegen kaputte/nie abgeschlossene Zeilen bzw. Frames.
     if len(buffer) > ST_MAX_LINE_BYTES * 4:
-        debug("ST001 buffer overflow, verworfen: {}".format(buffer))
+        debug("COIN buffer overflow, verworfen: {}".format(buffer))
         buffer = b""
 
-    while b"\n" in buffer:
-        raw_line, buffer = buffer.split(b"\n", 1)
+    while buffer:
+        if buffer[0:1] == b"H":
+            if len(buffer) < HX916_FRAME_LEN:
+                break  # Frame evtl. noch nicht vollständig eingetroffen
+            if buffer[0:2] != HX916_MARKER:
+                # "H" war Zufall (kein HX-916-Frame) -- 1 Byte verwerfen und weitersuchen
+                buffer = buffer[1:]
+                continue
+            points = buffer[2]
+            buffer = buffer[HX916_FRAME_LEN:]
+            _emit_hx916_coin(points)
+            continue
+
+        raw_line, rest = _take_line_bytes(buffer)
+        if raw_line is None:
+            break  # weder HX-916-Start noch vollständige Zeile -> mehr Daten abwarten
+        buffer = rest
 
         if not raw_line:
             continue
@@ -281,8 +383,8 @@ def main():
         freq=TOF_I2C_FREQ,
     )
 
-    # UART1: GP5 = RX vom ST-001.
-    # GP4/TX ist initialisiert, bleibt aber unbeschaltet.
+    # UART1: GP5 = RX vom Münzprüfer (ST-001 oder HX-916, siehe
+    # process_coin_uart()). GP4/TX ist initialisiert, bleibt aber unbeschaltet.
     st_uart = UART(
         ST_UART_ID,
         baudrate=ST_UART_BAUD,
@@ -295,7 +397,7 @@ def main():
         timeout_char=0,
     )
 
-    st_buffer = b""
+    coin_buffer = b""
 
     pc_poll = select.poll()
     pc_poll.register(sys.stdin, select.POLLIN)
@@ -321,13 +423,13 @@ def main():
 
     while True:
         # ---------------------------------------------------------------
-        # 1) ST-001 möglichst oft leeren, damit keine UART-Daten verloren gehen
+        # 1) Münzprüfer möglichst oft leeren, damit keine UART-Daten verloren gehen
         # ---------------------------------------------------------------
         try:
-            st_buffer = process_st001_uart(st_uart, st_buffer)
+            coin_buffer = process_coin_uart(st_uart, coin_buffer)
         except Exception as exc:
             debug("UART error: {}".format(exc))
-            st_buffer = b""
+            coin_buffer = b""
 
         # ---------------------------------------------------------------
         # 1b) PC-Kommandos (z.B. Schnittstellen-Identifikation) verarbeiten
