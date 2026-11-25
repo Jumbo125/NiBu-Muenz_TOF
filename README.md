@@ -20,6 +20,7 @@ Danach liegen auf dem Pico:
 
 USB-Protokoll (zum PC):
 READY
+VERSION:<x.y.z> (<datum>)   (einmal nach READY, zusätzlich nach DEBUG:ON)
 DISTANCE:<mm>
 PRESENCE        (Altprotokoll-Fallback, siehe unten)
 COIN:<cent>
@@ -27,6 +28,12 @@ STATUS:TOF=OK / STATUS:TOF=ERR
 DEBUG:STATE=ON / DEBUG:STATE=OFF
 ALIVE:<n>       (nur im DEBUG-Modus, Heartbeat)
 DBG:<text>      (nur im DEBUG-Modus)
+
+Firmware-Version: main.py enthält FIRMWARE_VERSION / FIRMWARE_DATE ganz am
+Dateianfang. Wird beim Boot (nach READY) und bei jedem DEBUG:ON gesendet,
+damit im coin_debug_monitor.py sofort sichtbar ist, welcher main.py-Stand
+tatsächlich auf dem Pico läuft -- bei jeder main.py-Änderung diese beiden
+Konstanten hochzählen/aktualisieren.
 
 
 ToF (VL53L1X) -- Distanzerkennung

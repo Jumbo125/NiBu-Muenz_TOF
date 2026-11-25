@@ -14,6 +14,9 @@
 # WICHTIG:
 #   Der Pico führt KEIN Guthaben. Jede Münze wird einzeln an den PC gemeldet.
 
+FIRMWARE_VERSION = "1.1.0"
+FIRMWARE_DATE = "2026-11-25"
+
 from machine import Pin, I2C, UART
 import time
 import sys
@@ -197,6 +200,7 @@ def process_pc_command(poll_obj, buffer):
             elif line == PC_DEBUG_ON_COMMAND:
                 DEBUG = True
                 usb_send("DEBUG:STATE=ON")
+                usb_send("VERSION:{} ({})".format(FIRMWARE_VERSION, FIRMWARE_DATE))
             elif line == PC_DEBUG_OFF_COMMAND:
                 DEBUG = False
                 usb_send("DEBUG:STATE=OFF")
@@ -537,6 +541,7 @@ def main():
     last_alive_send = time.ticks_add(time.ticks_ms(), -1000)
 
     usb_send("READY")
+    usb_send("VERSION:{} ({})".format(FIRMWARE_VERSION, FIRMWARE_DATE))
 
     while True:
         # ---------------------------------------------------------------
