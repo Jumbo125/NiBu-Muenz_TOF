@@ -19,7 +19,7 @@
 # Muenzpruefer selbst geloest (einer der beiden Kanaele deaktiviert/nicht
 # eingelernt), nicht hier in der Software.
 
-FIRMWARE_VERSION = "1.3.0"
+FIRMWARE_VERSION = "1.3.1"
 FIRMWARE_DATE = "2026-11-25"
 
 from machine import Pin, I2C, UART
@@ -253,6 +253,7 @@ def _emit_hx916_coin(points):
         return
 
     value = points * HX916_POINT_VALUE_CENT
+    debug("HX916 emitting COIN:{}".format(value))
     # Ganz wichtig: NICHT aufsummieren.
     usb_send("COIN:{}".format(value))
 
@@ -313,6 +314,7 @@ def process_coin_uart(uart, buffer):
     debug("COIN raw: {}".format(chunk))
 
     buffer += chunk
+    debug("COIN buffer now: {}".format(buffer))
 
     # Schutz gegen kaputte/nie abgeschlossene Zeilen bzw. Frames.
     if len(buffer) > ST_MAX_LINE_BYTES * 4:
@@ -322,6 +324,7 @@ def process_coin_uart(uart, buffer):
     while buffer:
         if buffer[0:1] == b"H":
             if len(buffer) < HX916_FRAME_LEN:
+                debug("HX916 frame incomplete, buffer={}".format(buffer))
                 break  # Frame evtl. noch nicht vollständig eingetroffen
             if buffer[0:2] != HX916_MARKER:
                 # "H" war Zufall (kein HX-916-Frame) -- 1 Byte verwerfen und weitersuchen
@@ -329,6 +332,7 @@ def process_coin_uart(uart, buffer):
                 continue
             points = buffer[2]
             buffer = buffer[HX916_FRAME_LEN:]
+            debug("HX916 frame parsed, points={}".format(points))
             _emit_hx916_coin(points)
             continue
 
