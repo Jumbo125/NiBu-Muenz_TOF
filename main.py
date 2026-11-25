@@ -602,7 +602,15 @@ def main():
         # ---------------------------------------------------------------
         # 2) VL53L1X bei Bedarf neu verbinden
         # ---------------------------------------------------------------
-        if tof is None:
+        # Im DEBUG-Modus (coin_debug_monitor.py --debug-on) wird der ToF-
+        # Zyklus komplett ausgesetzt: I2C-Transfers blockieren die
+        # Hauptschleife lange genug, dass der UART-Muenzpruefer-Puffer
+        # zwischendurch nicht oft genug geleert wird und raw-Frames
+        # abgeschnitten im Log landen. Produktivbetrieb (DEBUG=False)
+        # bleibt davon unberuehrt.
+        if DEBUG:
+            pass
+        elif tof is None:
             if time.ticks_diff(now, last_tof_init_try) >= TOF_RETRY_MS:
                 last_tof_init_try = now
                 try:
