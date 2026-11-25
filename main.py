@@ -14,7 +14,7 @@
 # WICHTIG:
 #   Der Pico führt KEIN Guthaben. Jede Münze wird einzeln an den PC gemeldet.
 
-FIRMWARE_VERSION = "1.1.0"
+FIRMWARE_VERSION = "1.2.1"
 FIRMWARE_DATE = "2026-11-25"
 
 from machine import Pin, I2C, UART
@@ -64,9 +64,13 @@ RELEASE_STABLE_MS = 1000          # muss 1,0 s wieder frei sein
 # welches Modell angeschlossen ist, erkennt die Firmware automatisch am
 # Byteformat, siehe Abschnitt MUENZPRUEFER weiter unten)
 # GP4 ist dadurch frei fuer den Impulsgeber (siehe PULSE_GEBER_PIN unten).
+# WICHTIG: UART1-TX ist NUR auf bestimmten GPIOs gueltig (RP2040-Pinmux) --
+# GP6 gehoert NICHT dazu ("bad TX pin"-Crash beim UART-Init). Gueltige
+# UART1-TX-Kandidaten sind u.a. GP4 und GP8; da GP4 jetzt der Pulsgeber-
+# Pin ist, liegt TX auf GP8 (ebenfalls unbeschaltet).
 ST_UART_ID = 1
 ST_UART_BAUD = 115200
-ST_UART_TX_PIN = 6       # GP6; wird nicht angeschlossen
+ST_UART_TX_PIN = 8       # GP8; wird nicht angeschlossen
 ST_UART_RX_PIN = 5       # GP5; TX des Münzprüfers kommt hierhin
 ST_MAX_LINE_BYTES = 256
 
@@ -490,7 +494,7 @@ def main():
     )
 
     # UART1: GP5 = RX vom Münzprüfer (ST-001 oder HX-916, siehe
-    # process_coin_uart()). GP6/TX ist initialisiert, bleibt aber unbeschaltet.
+    # process_coin_uart()). GP8/TX ist initialisiert, bleibt aber unbeschaltet.
     st_uart = UART(
         ST_UART_ID,
         baudrate=ST_UART_BAUD,
@@ -508,8 +512,17 @@ def main():
     # GP4 = Pulseingang vom Impulsgeber (siehe WIRING-Kommentar bei den
     # Konstanten). PULL_DOWN sorgt dafuer, dass der Pin bei offenem/nicht
     # angeschlossenem Kabel sicher auf LOW bleibt (kein Rausch-Fehlpuls).
-    pulse_pin = Pin(PULSE_GEBER_PIN, Pin.IN, Pin.PULL_DOWN)
-    pulse_pin.irq(trigger=Pin.IRQ_RISING, handler=_pulse_geber_irq)
+    #
+    # Solange GP4 unbeschaltet/offen ist (Impulsgeber noch nicht verkabelt),
+    # kann der Pin trotz PULL_DOWN sporadisch floaten/stoeren -- ein IRQ,
+    # der dadurch sehr haeufig feuert, darf main.py NICHT zum Absturz
+    # bringen (siehe READY/VERSION weiter unten, die sonst nie gesendet
+    # werden). Deshalb hier separat abgesichert.
+    try:
+        pulse_pin = Pin(PULSE_GEBER_PIN, Pin.IN, Pin.PULL_DOWN)
+        pulse_pin.irq(trigger=Pin.IRQ_RISING, handler=_pulse_geber_irq)
+    except Exception as exc:
+        usb_send("STATUS:PULSE_GEBER=ERR:{}".format(exc))
     pulse_burst_pulses = 0
     pulse_burst_since = None
 
@@ -697,9 +710,18 @@ def main():
 # "laeuft" dann nicht mehr, aber es kommt auch keine Fehlermeldung über
 # USB-Serial, die ein PC-seitiges Monitoring-Tool anzeigen koennte (siehe
 # coin_debug_monitor.py: keine Zeilen mehr, nur noch der REPL-Prompt
-# ">>>"). Deshalb hier Exception abfangen, ueber USB-Serial sichtbar
-# machen und den Pico danach neu starten (machine.reset()), statt im
-# REPL haengen zu bleiben.
+# ">>>"). Deshalb hier Exception abfangen und als FATAL:... ueber
+# USB-Serial sichtbar machen, BEVOR der Pico im REPL haengen bleibt.
+#
+# WICHTIG: main.py startet sich bei einem Fehler NICHT automatisch neu
+# (kein machine.reset() hier). Ein Fehler, der bei jedem main()-Aufruf
+# sofort wieder auftritt (z.B. defektes Pin-Setup), wuerde sonst eine
+# endlose Crash-Reset-Schleife erzeugen -- das haelt den USB-CDC-Port
+# dauerhaft instabil (Windows meldet dann ClearCommError/PermissionError
+# beim Oeffnen, auch nach Kabel-Neustecken, weil der Pico nie lange genug
+# "oben" bleibt, um den Port sauber zu bedienen). Stattdessen bleibt
+# main.py im REPL haengen, die FATAL-Zeile bleibt im Terminal-Scrollback
+# sichtbar, und der Fehler kann in Ruhe behoben werden.
 try:
     main()
 except Exception as exc:
@@ -707,6 +729,4 @@ except Exception as exc:
         usb_send("FATAL:{}".format(exc))
     except Exception:
         pass
-    time.sleep(2)
-    import machine
-    machine.reset()
+    # main.py NICHT neu starten -- Pico bleibt im REPL fuer Diagnose.
