@@ -67,7 +67,8 @@ RELEASE_STABLE_MS = 1000          # muss 1,0 s wieder frei sein
 # WICHTIG: UART1-TX ist NUR auf bestimmten GPIOs gueltig (RP2040-Pinmux) --
 # GP6 gehoert NICHT dazu ("bad TX pin"-Crash beim UART-Init). Gueltige
 # UART1-TX-Kandidaten sind u.a. GP4 und GP8; da GP4 jetzt der Pulsgeber-
-# Pin ist, liegt TX auf GP8 (ebenfalls unbeschaltet).
+# Pin ist, liegt TX auf GP8 (ebenfalls unbeschaltet, der Muenzpruefer
+# sendet nur, empfaengt nicht).
 ST_UART_ID = 1
 ST_UART_BAUD = 115200
 ST_UART_TX_PIN = 8       # GP8; wird nicht angeschlossen
@@ -90,12 +91,14 @@ HX916_POINT_VALUE_CENT = 10
 HX916_MIN_VALID_POINTS = 1
 HX916_MAX_VALID_POINTS = 50
 
-# Impulsgeber-Anschluss DESSELBEN HX-916 (laut Manual: 4pin-Buchse
-# Red=DC12V/White=COIN/Gnd=GND/Gray=Disable-Eingang). Der COIN-Pin liefert
+# Impulsgeber-Anschluss DESSELBEN HX-916 (am tatsaechlich verbauten Geraet
+# 4pin-Buchse: 12V/COIN/GND/Counter -- "Counter" ist ein separater
+# mechanischer Zaehlerausgang, KEIN Disable-Eingang wie im generischen
+# HX-916-Handbuch beschrieben; hier unbenutzt). Der COIN-Pin liefert
 # denselben Pl-Punktwert wie der UART-Ausgang, nur als rohen Pulszug statt
 # als "HX"-Byte-Frame -- 1 Puls = 1 Punkt, also gilt derselbe Centwert wie
 # bei HX916_POINT_VALUE_CENT (siehe oben). GP4 war bisher UART1-TX, wurde
-# aber nie beschaltet -- UART1-TX liegt jetzt auf GP6, damit GP4 fuer den
+# aber nie beschaltet -- UART1-TX liegt jetzt auf GP8, damit GP4 fuer den
 # COIN-Pulseingang frei ist.
 #
 # WIRING (tatsächlich verbaut, abweichend vom HX-916-Handbuch-Schaltplan):
@@ -586,6 +589,11 @@ def main():
                 last_alive_send = now_hb
                 alive_counter += 1
                 usb_send("ALIVE:{}".format(alive_counter))
+                # GP4-Pegel mitloggen -- Pico-GPIOs liefern nur HIGH/LOW
+                # (0/3.3V), keine echte Spannungsmessung wie ein Multimeter.
+                # Nur zur Diagnose der Pulsgeber-Verkabelung gedacht, daher
+                # an DEBUG gekoppelt (kein Zusatz-Traffic im Produktivbetrieb).
+                debug("GP4={}".format("HIGH" if pulse_pin.value() else "LOW"))
 
         # ---------------------------------------------------------------
         # 1) Münzprüfer möglichst oft leeren, damit keine UART-Daten verloren gehen
