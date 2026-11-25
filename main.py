@@ -14,7 +14,7 @@
 # WICHTIG:
 #   Der Pico führt KEIN Guthaben. Jede Münze wird einzeln an den PC gemeldet.
 
-FIRMWARE_VERSION = "1.2.1"
+FIRMWARE_VERSION = "1.2.2"
 FIRMWARE_DATE = "2026-11-25"
 
 from machine import Pin, I2C, UART
