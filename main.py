@@ -420,8 +420,9 @@ def main():
     release_since = None
 
     # Heartbeat: unabhaengig von ToF/UART, zeigt ob main.py ueberhaupt
-    # dauerhaft laeuft (Diagnose fuer coin_debug_monitor.py -- TEMPORAER,
-    # bei Bedarf wieder entfernen).
+    # dauerhaft laeuft (Diagnose). Sendet NUR bei DEBUG=True, also nur
+    # waehrend coin_debug_monitor.py --debug-on aktiv ist -- im normalen
+    # Produktivbetrieb (DEBUG=False) kein zusaetzlicher Traffic.
     alive_counter = 0
     last_alive_send = time.ticks_add(time.ticks_ms(), -1000)
 
@@ -429,13 +430,14 @@ def main():
 
     while True:
         # ---------------------------------------------------------------
-        # 0) Heartbeat (Diagnose, siehe oben)
+        # 0) Heartbeat (nur im DEBUG-Modus, siehe oben)
         # ---------------------------------------------------------------
-        now_hb = time.ticks_ms()
-        if time.ticks_diff(now_hb, last_alive_send) >= 1000:
-            last_alive_send = now_hb
-            alive_counter += 1
-            usb_send("ALIVE:{}".format(alive_counter))
+        if DEBUG:
+            now_hb = time.ticks_ms()
+            if time.ticks_diff(now_hb, last_alive_send) >= 1000:
+                last_alive_send = now_hb
+                alive_counter += 1
+                usb_send("ALIVE:{}".format(alive_counter))
 
         # ---------------------------------------------------------------
         # 1) Münzprüfer möglichst oft leeren, damit keine UART-Daten verloren gehen
