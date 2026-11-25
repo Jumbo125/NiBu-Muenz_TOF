@@ -159,11 +159,13 @@ Pinbelegung Pico
   GP1  = I2C0 SCL   -> VL53L1X
   GP4  = Pulseingang vom HX-916 COIN-Pin (über Spannungsteiler, siehe unten)
   GP5  = UART1 RX   <- TX vom Münzprüfer (ST-001 oder HX-916)
-  GP6  = UART1 TX   -> bleibt unbeschaltet (Pico sendet nichts an den Münzprüfer)
+  GP8  = UART1 TX   -> bleibt unbeschaltet (Pico sendet nichts an den Münzprüfer)
 
 Hinweis: GP4 war früher UART1-TX (unbeschaltet). UART1-TX liegt jetzt auf
-GP6, damit GP4 für den Impulseingang frei ist -- kein zusätzliches Kabel
+GP8, damit GP4 für den Impulseingang frei ist -- kein zusätzliches Kabel
 zum Münzprüfer nötig, wenn dort bereits ein TX-Kabel auf GP4 lag.
+WICHTIG: GP6 ist KEIN gültiger UART1-TX-Pin auf dem RP2040 (führt zu
+"bad TX pin"-Absturz beim UART-Init) -- deshalb GP8, nicht GP6.
 
 VL53L1X (I2C)
 --------------
@@ -176,7 +178,7 @@ Münzprüfer UART (ST-001 oder HX-916, TTL 3.3V, 115200 Baud)
 -------------------------------------------------------------
   Münzprüfer TX  -> GP5 (Pico RX)
   Münzprüfer GND -> Pico GND
-  (Pico TX/GP6 bleibt offen/unbeschaltet)
+  (Pico TX/GP8 bleibt offen/unbeschaltet)
 
 HX-916 Pulsausgang (COIN-Pin, 5V) -- Spannungsteiler auf GP4
 ----------------------------------------------------------------
