@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="210mm" height="297mm" viewBox="0 0 794 1123">
+<rect width="794" height="1123" fill="#fff"/>
+<text x="40" y="72" font-family="Inter, Helvetica, Arial, sans-serif" font-size="28" font-weight="800" fill="#171717" text-anchor="start">Fotobox · Pico-Verkabelung</text>
+<text x="40" y="94" font-family="Inter, Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#525252" text-anchor="start">Raspberry Pi Pico, Draufsicht · USB-Buchse oben · Pin 1 = oben links</text>
+<line x1="40" y1="106" x2="754" y2="106" stroke="#171717" stroke-width="2"/>
+<rect x="372" y="120" width="50" height="26" rx="4" fill="#a3a3a3" stroke="#737373" stroke-width="2"/>
+<text x="397" y="138" font-family="Inter, Helvetica, Arial, sans-serif" font-size="12" font-weight="600" fill="#171717" text-anchor="middle">USB</text>
+<rect x="316" y="144" width="162" height="522" rx="8" fill="#166534"/>
+<text x="397" y="656" font-family="Inter, Helvetica, Arial, sans-serif" font-size="12" font-weight="600" fill="#d1fae5" text-anchor="middle">Pico</text>
+<circle cx="329" cy="170.0" r="6" fill="#1f2937" stroke="#facc15" stroke-width="3"/>
+<text x="346" y="174.0" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="12" font-weight="400" fill="#d1fae5" text-anchor="start">1</text>
+<text x="310" y="174.5" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="13" font-weight="700" fill="#171717" text-anchor="end">GP0</text>
+<rect x="144.8" y="160.0" width="95.2" height="20" rx="4" fill="#1d4ed8"/>
+<text x="192.4" y="174.5" font-family="Inter, Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#fff" text-anchor="middle">VL53L1X SDA</text>
+<circle cx="465" cy="170.0" r="6" fill="#1f2937" stroke="#a16207" stroke-width="3"/>
+<text x="448" y="174.0" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="12" font-weight="400" fill="#d1fae5" text-anchor="end">40</text>
+<text x="484" y="174.5" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="13" font-weight="400" fill="#737373" text-anchor="start">VBUS</text>
+<circle cx="329" cy="194.0" r="6" fill="#1f2937" stroke="#facc15" stroke-width="3"/>
+<text x="346" y="198.0" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="12" font-weight="400" fill="#d1fae5" text-anchor="start">2</text>
+<text x="310" y="198.5" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="13" font-weight="700" fill="#171717" text-anchor="end">GP1</text>
+<rect x="144.8" y="184.0" width="95.2" height="20" rx="4" fill="#1d4ed8"/>
+<text x="192.4" y="198.5" font-family="Inter, Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#fff" text-anchor="middle">VL53L1X SCL</text>
+<circle cx="465" cy="194.0" r="6" fill="#1f2937" stroke="#a16207" stroke-width="3"/>
+<text x="448" y="198.0" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="12" font-weight="400" fill="#d1fae5" text-anchor="end">39</text>
+<text x="484" y="198.5" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="13" font-weight="400" fill="#737373" text-anchor="start">VSYS</text>
+<circle cx="329" cy="218.0" r="6" fill="#1f2937" stroke="#facc15" stroke-width="3"/>
+<text x="346" y="222.0" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="12" font-weight="400" fill="#d1fae5" text-anchor="start">3</text>
+<text x="310" y="222.5" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="13" font-weight="700" fill="#171717" text-anchor="end">GND</text>
+<rect x="202.4" y="208.0" width="37.6" height="20" rx="4" fill="#171717"/>
+<text x="221.20000000000002" y="222.5" font-family="Inter, Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#fff" text-anchor="middle">GND</text>
+<circle cx="465" cy="218.0" r="6" fill="#1f2937" stroke="#facc15" stroke-width="3"/>
+<text x="448" y="222.0" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="12" font-weight="400" fill="#d1fae5" text-anchor="end">38</text>
+<text x="484" y="222.5" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="13" font-weight="700" fill="#171717" text-anchor="start">GND</text>
+<rect x="554.0" y="208.0" width="37.6" height="20" rx="4" fill="#171717"/>
+<text x="572.8" y="222.5" font-family="Inter, Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#fff" text-anchor="middle">GND</text>
+<circle cx="329" cy="242.0" r="6" fill="#1f2937" stroke="#a16207" stroke-width="3"/>
+<text x="346" y="246.0" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="12" font-weight="400" fill="#d1fae5" text-anchor="start">4</text>
+<text x="310" y="246.5" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="13" font-weight="400" fill="#737373" text-anchor="end">GP2</text>
+<circle cx="465" cy="242.0" r="6" fill="#1f2937" stroke="#a16207" stroke-width="3"/>
+<text x="448" y="246.0" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="12" font-weight="400" fill="#d1fae5" text-anchor="end">37</text>
+<text x="484" y="246.5" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="13" font-weight="400" fill="#737373" text-anchor="start">3V3_EN</text>
+<circle cx="329" cy="266.0" r="6" fill="#1f2937" stroke="#a16207" stroke-width="3"/>
+<text x="346" y="270.0" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="12" font-weight="400" fill="#d1fae5" text-anchor="start">5</text>
+<text x="310" y="270.5" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="13" font-weight="400" fill="#737373" text-anchor="end">GP3</text>
+<circle cx="465" cy="266.0" r="6" fill="#1f2937" stroke="#facc15" stroke-width="3"/>
+<text x="448" y="270.0" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="12" font-weight="400" fill="#d1fae5" text-anchor="end">36</text>
+<text x="484" y="270.5" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="13" font-weight="700" fill="#171717" text-anchor="start">3V3(OUT)</text>
+<rect x="554.0" y="256.0" width="138.4" height="20" rx="4" fill="#b91c1c"/>
+<text x="623.2" y="270.5" font-family="Inter, Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#fff" text-anchor="middle">VL53L1X VCC 3,3 V</text>
+<circle cx="329" cy="290.0" r="6" fill="#1f2937" stroke="#facc15" stroke-width="3"/>
+<text x="346" y="294.0" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="12" font-weight="400" fill="#d1fae5" text-anchor="start">6</text>
+<text x="310" y="294.5" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="13" font-weight="700" fill="#171717" text-anchor="end">GP4</text>
+<rect x="80.0" y="280.0" width="160.0" height="20" rx="4" fill="#7e22ce"/>
+<text x="160.0" y="294.5" font-family="Inter, Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#fff" text-anchor="middle">HX-916 COIN (Teiler)</text>
+<circle cx="465" cy="290.0" r="6" fill="#1f2937" stroke="#a16207" stroke-width="3"/>
+<text x="448" y="294.0" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="12" font-weight="400" fill="#d1fae5" text-anchor="end">35</text>
+<text x="484" y="294.5" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="13" font-weight="400" fill="#737373" text-anchor="start">ADC_VREF</text>
+<circle cx="329" cy="314.0" r="6" fill="#1f2937" stroke="#facc15" stroke-width="3"/>
+<text x="346" y="318.0" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="12" font-weight="400" fill="#d1fae5" text-anchor="start">7</text>
+<text x="310" y="318.5" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="13" font-weight="700" fill="#171717" text-anchor="end">GP5</text>
+<rect x="130.4" y="304.0" width="109.6" height="20" rx="4" fill="#c2410c"/>
+<text x="185.2" y="318.5" font-family="Inter, Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#fff" text-anchor="middle">Münzprüfer TX</text>
+<circle cx="465" cy="314.0" r="6" fill="#1f2937" stroke="#a16207" stroke-width="3"/>
+<text x="448" y="318.0" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="12" font-weight="400" fill="#d1fae5" text-anchor="end">34</text>
+<text x="484" y="318.5" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="13" font-weight="400" fill="#737373" text-anchor="start">GP28</text>
+<circle cx="329" cy="338.0" r="6" fill="#1f2937" stroke="#facc15" stroke-width="3"/>
+<text x="346" y="342.0" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="12" font-weight="400" fill="#d1fae5" text-anchor="start">8</text>
+<text x="310" y="342.5" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="13" font-weight="700" fill="#171717" text-anchor="end">GND</text>
+<rect x="202.4" y="328.0" width="37.6" height="20" rx="4" fill="#171717"/>
+<text x="221.20000000000002" y="342.5" font-family="Inter, Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#fff" text-anchor="middle">GND</text>
+<circle cx="465" cy="338.0" r="6" fill="#1f2937" stroke="#a16207" stroke-width="3"/>
+<text x="448" y="342.0" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="12" font-weight="400" fill="#d1fae5" text-anchor="end">33</text>
+<text x="484" y="342.5" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="13" font-weight="400" fill="#737373" text-anchor="start">AGND</text>
+<circle cx="329" cy="362.0" r="6" fill="#1f2937" stroke="#facc15" stroke-width="3"/>
+<text x="346" y="366.0" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="12" font-weight="400" fill="#d1fae5" text-anchor="start">9</text>
+<text x="310" y="366.5" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="13" font-weight="700" fill="#171717" text-anchor="end">GP6</text>
+<rect x="116.0" y="352.0" width="124.0" height="20" rx="4" fill="#fff" stroke="#737373" stroke-width="1.5" stroke-dasharray="4 3"/>
+<text x="178.0" y="366.5" font-family="Inter, Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#525252" text-anchor="middle">frei (UART1-TX)</text>
+<circle cx="465" cy="362.0" r="6" fill="#1f2937" stroke="#a16207" stroke-width="3"/>
+<text x="448" y="366.0" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="12" font-weight="400" fill="#d1fae5" text-anchor="end">32</text>
+<text x="484" y="366.5" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="13" font-weight="400" fill="#737373" text-anchor="start">GP27</text>
+<circle cx="329" cy="386.0" r="6" fill="#1f2937" stroke="#a16207" stroke-width="3"/>
+<text x="346" y="390.0" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="12" font-weight="400" fill="#d1fae5" text-anchor="start">10</text>
+<text x="310" y="390.5" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="13" font-weight="400" fill="#737373" text-anchor="end">GP7</text>
+<circle cx="465" cy="386.0" r="6" fill="#1f2937" stroke="#a16207" stroke-width="3"/>
+<text x="448" y="390.0" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="12" font-weight="400" fill="#d1fae5" text-anchor="end">31</text>
+<text x="484" y="390.5" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="13" font-weight="400" fill="#737373" text-anchor="start">GP26</text>
+<circle cx="329" cy="410.0" r="6" fill="#1f2937" stroke="#a16207" stroke-width="3"/>
+<text x="346" y="414.0" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="12" font-weight="400" fill="#d1fae5" text-anchor="start">11</text>
+<text x="310" y="414.5" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="13" font-weight="400" fill="#737373" text-anchor="end">GP8</text>
+<circle cx="465" cy="410.0" r="6" fill="#1f2937" stroke="#a16207" stroke-width="3"/>
+<text x="448" y="414.0" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="12" font-weight="400" fill="#d1fae5" text-anchor="end">30</text>
+<text x="484" y="414.5" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="13" font-weight="400" fill="#737373" text-anchor="start">RUN</text>
+<circle cx="329" cy="434.0" r="6" fill="#1f2937" stroke="#a16207" stroke-width="3"/>
+<text x="346" y="438.0" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="12" font-weight="400" fill="#d1fae5" text-anchor="start">12</text>
+<text x="310" y="438.5" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="13" font-weight="400" fill="#737373" text-anchor="end">GP9</text>
+<circle cx="465" cy="434.0" r="6" fill="#1f2937" stroke="#a16207" stroke-width="3"/>
+<text x="448" y="438.0" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="12" font-weight="400" fill="#d1fae5" text-anchor="end">29</text>
+<text x="484" y="438.5" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="13" font-weight="400" fill="#737373" text-anchor="start">GP22</text>
+<circle cx="329" cy="458.0" r="6" fill="#1f2937" stroke="#facc15" stroke-width="3"/>
+<text x="346" y="462.0" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="12" font-weight="400" fill="#d1fae5" text-anchor="start">13</text>
+<text x="310" y="462.5" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="13" font-weight="700" fill="#171717" text-anchor="end">GND</text>
+<rect x="202.4" y="448.0" width="37.6" height="20" rx="4" fill="#171717"/>
+<text x="221.20000000000002" y="462.5" font-family="Inter, Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#fff" text-anchor="middle">GND</text>
+<circle cx="465" cy="458.0" r="6" fill="#1f2937" stroke="#facc15" stroke-width="3"/>
+<text x="448" y="462.0" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="12" font-weight="400" fill="#d1fae5" text-anchor="end">28</text>
+<text x="484" y="462.5" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="13" font-weight="700" fill="#171717" text-anchor="start">GND</text>
+<rect x="554.0" y="448.0" width="37.6" height="20" rx="4" fill="#171717"/>
+<text x="572.8" y="462.5" font-family="Inter, Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#fff" text-anchor="middle">GND</text>
+<circle cx="329" cy="482.0" r="6" fill="#1f2937" stroke="#a16207" stroke-width="3"/>
+<text x="346" y="486.0" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="12" font-weight="400" fill="#d1fae5" text-anchor="start">14</text>
+<text x="310" y="486.5" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="13" font-weight="400" fill="#737373" text-anchor="end">GP10</text>
+<circle cx="465" cy="482.0" r="6" fill="#1f2937" stroke="#a16207" stroke-width="3"/>
+<text x="448" y="486.0" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="12" font-weight="400" fill="#d1fae5" text-anchor="end">27</text>
+<text x="484" y="486.5" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="13" font-weight="400" fill="#737373" text-anchor="start">GP21</text>
+<circle cx="329" cy="506.0" r="6" fill="#1f2937" stroke="#a16207" stroke-width="3"/>
+<text x="346" y="510.0" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="12" font-weight="400" fill="#d1fae5" text-anchor="start">15</text>
+<text x="310" y="510.5" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="13" font-weight="400" fill="#737373" text-anchor="end">GP11</text>
+<circle cx="465" cy="506.0" r="6" fill="#1f2937" stroke="#a16207" stroke-width="3"/>
+<text x="448" y="510.0" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="12" font-weight="400" fill="#d1fae5" text-anchor="end">26</text>
+<text x="484" y="510.5" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="13" font-weight="400" fill="#737373" text-anchor="start">GP20</text>
+<circle cx="329" cy="530.0" r="6" fill="#1f2937" stroke="#a16207" stroke-width="3"/>
+<text x="346" y="534.0" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="12" font-weight="400" fill="#d1fae5" text-anchor="start">16</text>
+<text x="310" y="534.5" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="13" font-weight="400" fill="#737373" text-anchor="end">GP12</text>
+<circle cx="465" cy="530.0" r="6" fill="#1f2937" stroke="#a16207" stroke-width="3"/>
+<text x="448" y="534.0" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="12" font-weight="400" fill="#d1fae5" text-anchor="end">25</text>
+<text x="484" y="534.5" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="13" font-weight="400" fill="#737373" text-anchor="start">GP19</text>
+<circle cx="329" cy="554.0" r="6" fill="#1f2937" stroke="#a16207" stroke-width="3"/>
+<text x="346" y="558.0" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="12" font-weight="400" fill="#d1fae5" text-anchor="start">17</text>
+<text x="310" y="558.5" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="13" font-weight="400" fill="#737373" text-anchor="end">GP13</text>
+<circle cx="465" cy="554.0" r="6" fill="#1f2937" stroke="#a16207" stroke-width="3"/>
+<text x="448" y="558.0" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="12" font-weight="400" fill="#d1fae5" text-anchor="end">24</text>
+<text x="484" y="558.5" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="13" font-weight="400" fill="#737373" text-anchor="start">GP18</text>
+<circle cx="329" cy="578.0" r="6" fill="#1f2937" stroke="#facc15" stroke-width="3"/>
+<text x="346" y="582.0" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="12" font-weight="400" fill="#d1fae5" text-anchor="start">18</text>
+<text x="310" y="582.5" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="13" font-weight="700" fill="#171717" text-anchor="end">GND</text>
+<rect x="202.4" y="568.0" width="37.6" height="20" rx="4" fill="#171717"/>
+<text x="221.20000000000002" y="582.5" font-family="Inter, Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#fff" text-anchor="middle">GND</text>
+<circle cx="465" cy="578.0" r="6" fill="#1f2937" stroke="#facc15" stroke-width="3"/>
+<text x="448" y="582.0" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="12" font-weight="400" fill="#d1fae5" text-anchor="end">23</text>
+<text x="484" y="582.5" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="13" font-weight="700" fill="#171717" text-anchor="start">GND</text>
+<rect x="554.0" y="568.0" width="37.6" height="20" rx="4" fill="#171717"/>
+<text x="572.8" y="582.5" font-family="Inter, Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#fff" text-anchor="middle">GND</text>
+<circle cx="329" cy="602.0" r="6" fill="#1f2937" stroke="#a16207" stroke-width="3"/>
+<text x="346" y="606.0" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="12" font-weight="400" fill="#d1fae5" text-anchor="start">19</text>
+<text x="310" y="606.5" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="13" font-weight="400" fill="#737373" text-anchor="end">GP14</text>
+<circle cx="465" cy="602.0" r="6" fill="#1f2937" stroke="#a16207" stroke-width="3"/>
+<text x="448" y="606.0" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="12" font-weight="400" fill="#d1fae5" text-anchor="end">22</text>
+<text x="484" y="606.5" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="13" font-weight="400" fill="#737373" text-anchor="start">GP17</text>
+<circle cx="329" cy="626.0" r="6" fill="#1f2937" stroke="#a16207" stroke-width="3"/>
+<text x="346" y="630.0" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="12" font-weight="400" fill="#d1fae5" text-anchor="start">20</text>
+<text x="310" y="630.5" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="13" font-weight="400" fill="#737373" text-anchor="end">GP15</text>
+<circle cx="465" cy="626.0" r="6" fill="#1f2937" stroke="#a16207" stroke-width="3"/>
+<text x="448" y="630.0" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="12" font-weight="400" fill="#d1fae5" text-anchor="end">21</text>
+<text x="484" y="630.5" font-family="JetBrains Mono, Consolas, Menlo, monospace" font-size="13" font-weight="400" fill="#737373" text-anchor="start">GP16</text>
+<line x1="40" y1="682" x2="754" y2="682" stroke="#d4d4d4" stroke-width="1"/>
+<text x="40" y="706" font-family="Inter, Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#7e22ce" text-anchor="start">HX-916 Pulsausgang → GP4 (Spannungsteiler 5 V → 3,3 V)</text>
+<line x1="152" y1="754" x2="200" y2="754" stroke="#171717" stroke-width="2"/>
+<rect x="200" y="745" width="62" height="18" fill="#fff" stroke="#171717" stroke-width="2"/>
+<line x1="262" y1="754" x2="340" y2="754" stroke="#7e22ce" stroke-width="2"/>
+<line x1="302" y1="754" x2="302" y2="784" stroke="#171717" stroke-width="2"/>
+<rect x="293" y="784" width="18" height="52" fill="#fff" stroke="#171717" stroke-width="2"/>
+<line x1="302" y1="836" x2="302" y2="866" stroke="#171717" stroke-width="2"/>
+<line x1="152" y1="866" x2="340" y2="866" stroke="#171717" stroke-width="2"/>
+<circle cx="302" cy="754" r="4.5" fill="#171717"/>
+<circle cx="302" cy="866" r="4.5" fill="#171717"/>
+<text x="40" y="750" font-family="Inter, Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#171717" text-anchor="start">HX-916 COIN</text>
+<text x="40" y="766" font-family="Inter, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#525252" text-anchor="start">5 V Puls</text>
+<text x="40" y="870" font-family="Inter, Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#171717" text-anchor="start">HX-916 GND</text>
+<text x="231" y="738" font-family="Inter, Helvetica, Arial, sans-serif" font-size="12" font-weight="700" fill="#171717" text-anchor="middle">R1 10 kΩ</text>
+<text x="320" y="806" font-family="Inter, Helvetica, Arial, sans-serif" font-size="12" font-weight="700" fill="#171717" text-anchor="start">R2 20 kΩ</text>
+<text x="320" y="822" font-family="Inter, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#525252" text-anchor="start">(alt. 22 kΩ)</text>
+<text x="346" y="750" font-family="Inter, Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#7e22ce" text-anchor="start">Pico GP4</text>
+<text x="346" y="766" font-family="Inter, Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#525252" text-anchor="start">Pin 6 · 3,33 V</text>
+<text x="346" y="870" font-family="Inter, Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#171717" text-anchor="start">Pico GND</text>
+<text x="40" y="904" font-family="Inter, Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#171717" text-anchor="start">V<tspan baseline-shift="sub" font-size="10">out</tspan> = 5 V × 20k / (10k + 20k) = 3,33 V</text>
+<text x="40" y="923" font-family="Inter, Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#171717" text-anchor="start">R2 = 22 kΩ geht auch → 3,44 V</text>
+<text x="40" y="942" font-family="Inter, Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#171717" text-anchor="start">Nur die 2 Widerstände, kein Kondensator</text>
+<text x="40" y="961" font-family="Inter, Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#171717" text-anchor="start">GP4 hat intern PULL_DOWN → bei Kabelbruch LOW</text>
+<text x="466" y="706" font-family="Inter, Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#7e22ce" text-anchor="start">HX-916 einstellen</text>
+<text x="466" y="726" font-family="Inter, Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#171717" text-anchor="start">Schaltkontakt: <tspan font-weight="700">NO</tspan></text>
+<text x="466" y="745" font-family="Inter, Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#171717" text-anchor="start">Pulsbreite: <tspan font-weight="700">100 ms (slow)</tspan></text>
+<text x="466" y="778" font-family="Inter, Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#c2410c" text-anchor="start">Münzprüfer UART1</text>
+<text x="466" y="798" font-family="Inter, Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#171717" text-anchor="start">TX Münzprüfer → GP5 (Pin 7)</text>
+<text x="466" y="817" font-family="Inter, Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#171717" text-anchor="start">GP6 (Pin 9) = UART1-TX, frei</text>
+<text x="466" y="850" font-family="Inter, Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#1d4ed8" text-anchor="start">ToF VL53L1X (I²C0)</text>
+<text x="466" y="870" font-family="Inter, Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#171717" text-anchor="start">SDA → GP0 (Pin 1)</text>
+<text x="466" y="889" font-family="Inter, Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#171717" text-anchor="start">SCL → GP1 (Pin 2)</text>
+<text x="466" y="908" font-family="Inter, Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#171717" text-anchor="start">VCC → 3V3 OUT (Pin 36)</text>
+<text x="466" y="941" font-family="Inter, Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#171717" text-anchor="start">Masse</text>
+<text x="466" y="961" font-family="Inter, Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#171717" text-anchor="start">Alle GND gemeinsam: Pico, ToF, HX-916</text>
+<text x="466" y="980" font-family="Inter, Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#171717" text-anchor="start">– jeder GND-Pin geht</text>
+</svg>
