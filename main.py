@@ -375,6 +375,9 @@ def _take_line_bytes(buffer):
     return buffer[:end], buffer[next_start:]
 
 
+COIN_UART_SETTLE_MS = 3  # siehe Kommentar in process_coin_uart()
+
+
 def process_coin_uart(uart, buffer):
     """
     Liest alle aktuell verfügbaren UART-Daten vom Münzprüfer.
@@ -383,6 +386,19 @@ def process_coin_uart(uart, buffer):
     """
     if not uart.any():
         return buffer
+
+    # Manche Muenzpruefer senden ein Frame nicht als einzelnen
+    # zusammenhaengenden Byte-Burst, sondern mit einer winzigen Pause
+    # mittendrin (UART-FIFO/Zwischenpuffer des Sensors). Ohne diese
+    # kurze Wartezeit liest uart.read() manchmal nur die ersten paar
+    # Bytes, der Rest landet erst im naechsten Hauptschleifen-Durchlauf
+    # -- das zerreisst sowohl die DBG:COIN-raw-Diagnose als auch (bei
+    # ST-001/HX-916) im Extremfall ein echtes Frame. 3ms sind im
+    # Vergleich zur eigentlichen Uebertragungsdauer (~1ms bei 115200
+    # Baud fuer wenige Bytes) vernachlaessigbar, verzoegern aber die
+    # Hauptschleife spuerbar weniger als ein ToF-I2C-Zyklus -- kein
+    # messbarer Einfluss auf Praesenz-/Muenzerkennung im Normalbetrieb.
+    time.sleep_ms(COIN_UART_SETTLE_MS)
 
     chunk = uart.read()
     if not chunk:
