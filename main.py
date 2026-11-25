@@ -6,15 +6,20 @@
 #   - stabile Präsenz -> "PRESENCE" über USB-Serial senden
 #   - Münzprüfer über UART lesen (ST-001 ASCII ODER HX-916 binär,
 #     automatisch erkannt -- siehe Abschnitt MUENZPRUEFER weiter unten)
-#   - ODER denselben HX-916 über seinen COIN-Pulsausgang an GP4 lesen
-#     (siehe PULSE_GEBER_* weiter unten) -- UART und Pulsausgang laufen
-#     unabhaengig, auch gleichzeitig (z.B. falls beide Kabel haengen)
 #   - "COIN:<cent>" über USB-Serial senden
 #
 # WICHTIG:
 #   Der Pico führt KEIN Guthaben. Jede Münze wird einzeln an den PC gemeldet.
+#
+# HINWEIS (2026-11-25): Der COIN-Pulsausgang (ehemals GP4) wurde wieder
+# entfernt -- der Pulsgeber hat im Test zuverlaessig Pulse verschluckt
+# (nur 2 von 5 Muenzen kamen an). Muenzerkennung laeuft daher wieder
+# ausschliesslich ueber UART/GP5. Bekannte Einschraenkung: Kanal 2
+# (20 Cent) und Kanal 4 (1 Euro) senden denselben UART-Code -- wird am
+# Muenzpruefer selbst geloest (einer der beiden Kanaele deaktiviert/nicht
+# eingelernt), nicht hier in der Software.
 
-FIRMWARE_VERSION = "1.2.2"
+FIRMWARE_VERSION = "1.3.0"
 FIRMWARE_DATE = "2026-11-25"
 
 from machine import Pin, I2C, UART
@@ -63,12 +68,10 @@ RELEASE_STABLE_MS = 1000          # muss 1,0 s wieder frei sein
 # Münzprüfer / UART1 (ST-001 ODER HX-916 -- gleiche Verkabelung/Baudrate,
 # welches Modell angeschlossen ist, erkennt die Firmware automatisch am
 # Byteformat, siehe Abschnitt MUENZPRUEFER weiter unten)
-# GP4 ist dadurch frei fuer den Impulsgeber (siehe PULSE_GEBER_PIN unten).
 # WICHTIG: UART1-TX ist NUR auf bestimmten GPIOs gueltig (RP2040-Pinmux) --
-# GP6 gehoert NICHT dazu ("bad TX pin"-Crash beim UART-Init). Gueltige
-# UART1-TX-Kandidaten sind u.a. GP4 und GP8; da GP4 jetzt der Pulsgeber-
-# Pin ist, liegt TX auf GP8 (ebenfalls unbeschaltet, der Muenzpruefer
-# sendet nur, empfaengt nicht).
+# GP6 gehoert NICHT dazu ("bad TX pin"-Crash beim UART-Init). TX liegt auf
+# GP8 (unbeschaltet, der Muenzpruefer sendet nur, empfaengt nicht). GP4 ist
+# unbenutzt (ehemals Pulsgeber-Pin, siehe Firmware-Historie).
 ST_UART_ID = 1
 ST_UART_BAUD = 115200
 ST_UART_TX_PIN = 8       # GP8; wird nicht angeschlossen
@@ -90,42 +93,6 @@ HX916_FRAME_LEN = 3
 HX916_POINT_VALUE_CENT = 10
 HX916_MIN_VALID_POINTS = 1
 HX916_MAX_VALID_POINTS = 50
-
-# Impulsgeber-Anschluss DESSELBEN HX-916 (am tatsaechlich verbauten Geraet
-# 4pin-Buchse: 12V/COIN/GND/Counter -- "Counter" ist ein separater
-# mechanischer Zaehlerausgang, KEIN Disable-Eingang wie im generischen
-# HX-916-Handbuch beschrieben; hier unbenutzt). Der COIN-Pin liefert
-# denselben Pl-Punktwert wie der UART-Ausgang, nur als rohen Pulszug statt
-# als "HX"-Byte-Frame -- 1 Puls = 1 Punkt, also gilt derselbe Centwert wie
-# bei HX916_POINT_VALUE_CENT (siehe oben). GP4 war bisher UART1-TX, wurde
-# aber nie beschaltet -- UART1-TX liegt jetzt auf GP8, damit GP4 fuer den
-# COIN-Pulseingang frei ist.
-#
-# WIRING (tatsächlich verbaut, abweichend vom HX-916-Handbuch-Schaltplan):
-#   Pico 3V3 --[R 10k]-- GP4
-#   Muenzpruefer COIN (Open-Collector, zieht bei Impuls gegen GND) -- GP4
-#   Muenzpruefer GND -------------------------------------------------- Pico GND
-#
-#   Ruhezustand (Kontakt offen):  GP4 liegt über den 10k-Pull-up auf 3V3 -> HIGH
-#   Impuls (Kontakt schliesst):   COIN-Ausgang zieht GP4 kurz gegen GND -> LOW
-#
-#   Daher IRQ_FALLING (nicht RISING) und PULL_UP (nicht PULL_DOWN) --
-#   bei Kabelbruch/offenem COIN-Pin bleibt GP4 dank PULL_UP sicher auf
-#   HIGH (kein Fehl-Puls, da nur die fallende Flanke zählt).
-#
-# Pulsbreite am HX-916 (3-step switch) auf 100ms (slow) stellen -- robuster
-# gegen verpasste/verschluckte Flanken als 30/50ms, Geschwindigkeit spielt
-# beim Münzeinwurf keine nennenswerte Rolle.
-#
-# Protokoll: jeder Puls zaehlt als 1 Punkt (-> HX916_POINT_VALUE_CENT Cent).
-# Ein Pulszug (z.B. 5 Pulse bei Pl=5) wird ueber PULSE_GEBER_BURST_WINDOW_MS
-# zu einem Muenzwert aufsummiert -- siehe process_pulse_geber() weiter unten.
-# Burst-Fenster bewusst grosszuegig: bei Pl=50 und 100ms-Pulsbreite kann ein
-# Pulszug mehrere Sekunden dauern (50 Pulse x ca. 100-150ms Pause/Puls).
-PULSE_GEBER_PIN = 4                   # GP4; COIN-Pulseingang vom HX-916 (3.3V!)
-PULSE_GEBER_DEBOUNCE_MS = 15          # Mindestabstand zwischen zwei gueltigen Flanken
-PULSE_GEBER_BURST_WINDOW_MS = 1500    # Pause nach letztem Puls -> Pulszug abgeschlossen
-PULSE_GEBER_MAX_PULSES_PER_BURST = HX916_MAX_VALID_POINTS  # Plausibilitaetsgrenze (siehe HX916)
 
 # PC-Identifikation
 # Der PC-Server (Windows/Linux) kann beim Durchsuchen aller seriellen
@@ -286,79 +253,6 @@ def _emit_hx916_coin(points):
         return
 
     value = points * HX916_POINT_VALUE_CENT
-    # Ganz wichtig: NICHT aufsummieren.
-    usb_send("COIN:{}".format(value))
-
-
-# ---------------------------------------------------------------------------
-# IMPULSGEBER-MUENZZAEHLER (GP4, siehe WIRING-Kommentar oben)
-# ---------------------------------------------------------------------------
-#
-# IRQ zaehlt entprellte Flanken in eine globale Variable (IRQ-Handler muss
-# auf dem Pico minimal bleiben -- keine Objekte/Allokationen, siehe
-# MicroPython-Doku zu IRQ-Handlern). Die Hauptschleife sammelt Pulse
-# innerhalb von PULSE_GEBER_BURST_WINDOW_MS und meldet sie als eine Muenze.
-
-_pulse_count = 0
-_pulse_last_tick = 0
-
-
-def _pulse_geber_irq(pin):
-    global _pulse_count, _pulse_last_tick
-    now = time.ticks_ms()
-    if time.ticks_diff(now, _pulse_last_tick) < PULSE_GEBER_DEBOUNCE_MS:
-        return  # Entprellung: zu kurz nach letzter Flanke, verwerfen
-    _pulse_last_tick = now
-    _pulse_count += 1
-    if DEBUG:
-        # Direkt im IRQ-Handler senden (statt erst in der Hauptschleife
-        # gesammelt) -- zeigt JEDE einzelne Flanke mit Zeitstempel, auch
-        # wenn sie durch Kontaktprobleme/zu kurze Pulsbreite nur sehr
-        # unregelmaessig auftritt. Nur zur Diagnose der Pulsgeber-
-        # Verkabelung gedacht (siehe GP4-Heartbeat weiter unten), daher an
-        # DEBUG gekoppelt.
-        usb_send("DBG:GP4 FALL t={}".format(now))
-
-
-def process_pulse_geber(burst_pulses, burst_since, now):
-    """
-    Sammelt entprellte Pulse (aus _pulse_count) zu einem Pulszug. burst_since
-    wird bei JEDEM neuen Puls auf "jetzt" zurückgesetzt -- der Pulszug gilt
-    erst als abgeschlossen, wenn seit dem LETZTEN Puls PULSE_GEBER_BURST_WINDOW_MS
-    ohne weiteren Puls vergangen sind (Pause-Erkennung, nicht Gesamtdauer).
-    Danach wird EINE Muenze mit Wert = Pulsanzahl * HX916_POINT_VALUE_CENT gemeldet.
-
-    Gibt (burst_pulses, burst_since) fuer den naechsten Aufruf zurueck.
-    """
-    global _pulse_count
-
-    if _pulse_count > burst_pulses:
-        new_pulses = _pulse_count - burst_pulses
-        burst_pulses = _pulse_count
-        burst_since = now
-        debug("Pulsgeber: +{} Puls(e), insgesamt {}".format(new_pulses, burst_pulses))
-
-    if burst_pulses and burst_since is not None:
-        if time.ticks_diff(now, burst_since) >= PULSE_GEBER_BURST_WINDOW_MS:
-            _emit_pulse_geber_coin(burst_pulses)
-            burst_pulses = 0
-            burst_since = None
-            _pulse_count = 0
-
-    return burst_pulses, burst_since
-
-
-def _emit_pulse_geber_coin(pulses):
-    """
-    Rechnet eine gesammelte Pulsanzahl (= Pl-Punktwert desselben HX-916, nur
-    über den COIN-Pulsausgang statt UART) über HX916_POINT_VALUE_CENT in
-    Cent um und meldet COIN:<cent>.
-    """
-    if pulses < 1 or pulses > PULSE_GEBER_MAX_PULSES_PER_BURST:
-        debug("Pulsgeber Pulsanzahl außerhalb Plausibilitätsbereich: {}".format(pulses))
-        return
-
-    value = pulses * HX916_POINT_VALUE_CENT
     # Ganz wichtig: NICHT aufsummieren.
     usb_send("COIN:{}".format(value))
 
@@ -537,26 +431,6 @@ def main():
 
     coin_buffer = b""
 
-    # GP4 = Pulseingang vom Impulsgeber (siehe WIRING-Kommentar bei den
-    # Konstanten). Externer 10k-Pull-up an 3V3 haelt GP4 im Ruhezustand
-    # auf HIGH; der Open-Collector-COIN-Ausgang zieht bei einem Impuls
-    # kurz gegen GND -> fallende Flanke zaehlt. PULL_UP sorgt zusaetzlich
-    # dafuer, dass der Pin bei offenem/nicht angeschlossenem Kabel sicher
-    # auf HIGH bleibt (kein Rausch-Fehlpuls durch IRQ_FALLING).
-    #
-    # Solange GP4 unbeschaltet/offen ist (Impulsgeber noch nicht verkabelt),
-    # kann der Pin trotz PULL_UP sporadisch floaten/stoeren -- ein IRQ,
-    # der dadurch sehr haeufig feuert, darf main.py NICHT zum Absturz
-    # bringen (siehe READY/VERSION weiter unten, die sonst nie gesendet
-    # werden). Deshalb hier separat abgesichert.
-    try:
-        pulse_pin = Pin(PULSE_GEBER_PIN, Pin.IN, Pin.PULL_UP)
-        pulse_pin.irq(trigger=Pin.IRQ_FALLING, handler=_pulse_geber_irq)
-    except Exception as exc:
-        usb_send("STATUS:PULSE_GEBER=ERR:{}".format(exc))
-    pulse_burst_pulses = 0
-    pulse_burst_since = None
-
     pc_poll = select.poll()
     pc_poll.register(sys.stdin, select.POLLIN)
     pc_buffer = ""
@@ -597,11 +471,6 @@ def main():
                 last_alive_send = now_hb
                 alive_counter += 1
                 usb_send("ALIVE:{}".format(alive_counter))
-                # GP4-Pegel mitloggen -- Pico-GPIOs liefern nur HIGH/LOW
-                # (0/3.3V), keine echte Spannungsmessung wie ein Multimeter.
-                # Nur zur Diagnose der Pulsgeber-Verkabelung gedacht, daher
-                # an DEBUG gekoppelt (kein Zusatz-Traffic im Produktivbetrieb).
-                debug("GP4={}".format("HIGH" if pulse_pin.value() else "LOW"))
 
         # ---------------------------------------------------------------
         # 1) Münzprüfer möglichst oft leeren, damit keine UART-Daten verloren gehen
@@ -613,19 +482,7 @@ def main():
             coin_buffer = b""
 
         # ---------------------------------------------------------------
-        # 1a) Impulsgeber (GP4) auswerten -- unabhaengig von UART-Muenzpruefer
-        # ---------------------------------------------------------------
-        try:
-            pulse_burst_pulses, pulse_burst_since = process_pulse_geber(
-                pulse_burst_pulses, pulse_burst_since, time.ticks_ms()
-            )
-        except Exception as exc:
-            debug("Pulsgeber error: {}".format(exc))
-            pulse_burst_pulses = 0
-            pulse_burst_since = None
-
-        # ---------------------------------------------------------------
-        # 1b) PC-Kommandos (z.B. Schnittstellen-Identifikation) verarbeiten
+        # 1a) PC-Kommandos (z.B. Schnittstellen-Identifikation) verarbeiten
         # ---------------------------------------------------------------
         try:
             pc_buffer = process_pc_command(pc_poll, pc_buffer)
