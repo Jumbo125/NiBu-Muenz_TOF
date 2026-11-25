@@ -310,6 +310,14 @@ def _pulse_geber_irq(pin):
         return  # Entprellung: zu kurz nach letzter Flanke, verwerfen
     _pulse_last_tick = now
     _pulse_count += 1
+    if DEBUG:
+        # Direkt im IRQ-Handler senden (statt erst in der Hauptschleife
+        # gesammelt) -- zeigt JEDE einzelne Flanke mit Zeitstempel, auch
+        # wenn sie durch Kontaktprobleme/zu kurze Pulsbreite nur sehr
+        # unregelmaessig auftritt. Nur zur Diagnose der Pulsgeber-
+        # Verkabelung gedacht (siehe GP4-Heartbeat weiter unten), daher an
+        # DEBUG gekoppelt.
+        usb_send("DBG:GP4 FALL t={}".format(now))
 
 
 def process_pulse_geber(burst_pulses, burst_since, now):
