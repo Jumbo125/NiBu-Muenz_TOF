@@ -18,8 +18,20 @@
 # (20 Cent) und Kanal 4 (1 Euro) senden denselben UART-Code -- wird am
 # Muenzpruefer selbst geloest (einer der beiden Kanaele deaktiviert/nicht
 # eingelernt), nicht hier in der Software.
+#
+# HINWEIS (2026-11-26): Am Release-Geraet wurde zusaetzlich ein zweites
+# Binaerformat beobachtet (0x70-Marker, siehe PULSE70_* weiter unten),
+# das sich mit dem HX-Format abwechselt (Ursache/Ausloeser unklar,
+# vermutlich geraeteinterner Modus-Wechsel, kein Kabel-/Wackelkontakt-
+# Problem, da auch nach komplett neu verkabeltem Aufbau aufgetreten).
+# NUR 1 Euro, 2 Euro und 50 Cent wurden beobachtet und zugeordnet --
+# 10 Cent und 20 Cent sind fuer dieses Format NICHT verifiziert und
+# werden bewusst NICHT gebucht (nur geloggt), bis weitere Testdaten
+# vorliegen. Die bestehende Centwert-Zuordnung basiert auf wenigen
+# Beobachtungen, nicht auf einer dokumentierten Spezifikation -- im
+# Zweifel Diagnose-Log pruefen (DBG:Pulse70 frame ...).
 
-FIRMWARE_VERSION = "1.3.1"
+FIRMWARE_VERSION = "1.4.0"
 FIRMWARE_DATE = "2026-11-25"
 
 from machine import Pin, I2C, UART
@@ -93,6 +105,26 @@ HX916_FRAME_LEN = 3
 HX916_POINT_VALUE_CENT = 10
 HX916_MIN_VALID_POINTS = 1
 HX916_MAX_VALID_POINTS = 50
+
+# Alternatives binaeres HX-916-Protokoll (am Release-Geraet beobachtet,
+# wechselt sich mit dem HX-Format ab -- vermutlich geraeteinterner Modus,
+# Ursache unklar). Frame beginnt immer mit 0x70, Byte 1 ist ein Flag-Byte
+# (0x8C oder 0x8E, fuer den Wert irrelevant), danach folgt je nach Muenze
+# entweder ein 3-Byte-Frame (70 <flag> <wert>) oder ein 5-Byte-Frame
+# (70 <flag> 80 <wert> FC). Zuordnung NUR aus Beobachtung abgeleitet
+# (10c/20c noch nicht verifiziert) -- siehe PULSE70_VALUE_CENT_BY_LAST_BYTE.
+PULSE70_MARKER = 0x70
+PULSE70_SHORT_FRAME_LEN = 3
+PULSE70_LONG_FRAME_LEN = 5
+PULSE70_LONG_FRAME_MARKER_BYTE2 = 0x80
+PULSE70_LONG_FRAME_TAIL = 0xFC
+PULSE70_VALUE_CENT_BY_LAST_BYTE = {
+    0x70: 100,   # 1 Euro (3-Byte-Frame, letztes Byte 0x70)
+    0x8C: 50,    # 50 Cent (3-Byte-Frame, letztes Byte 0x8C)
+    0x8E: 50,    # 50 Cent (3-Byte-Frame, letztes Byte 0x8E -- Flag-Variante)
+    0x0C: 200,   # 2 Euro (5-Byte-Frame, Byte 3 0x0C)
+    0x0E: 200,   # 2 Euro (5-Byte-Frame, Byte 3 0x0E -- Flag-Variante)
+}
 
 # PC-Identifikation
 # Der PC-Server (Windows/Linux) kann beim Durchsuchen aller seriellen
@@ -258,6 +290,41 @@ def _emit_hx916_coin(points):
     usb_send("COIN:{}".format(value))
 
 
+def _try_parse_pulse70_frame(buffer):
+    """
+    Erkennt das alternative 0x70-Binaerframe (siehe PULSE70_* Konstanten).
+    Gibt (value_cent_oder_None, anzahl_verbrauchter_bytes) zurueck.
+    anzahl_verbrauchter_bytes == 0 bedeutet: noch nicht genug Daten, warten.
+    value_cent_oder_None == None bei verbrauchten Bytes heisst: Frame erkannt,
+    aber Wert nicht in der Zuordnungstabelle (unbekannt, nicht buchen).
+    """
+    if len(buffer) < PULSE70_SHORT_FRAME_LEN:
+        return None, 0
+
+    # Byte 2 == 0x80 ist der Start des langen 5-Byte-Frames -- bei genau 3
+    # Bytes im Puffer koennten die restlichen 2 Bytes noch unterwegs sein,
+    # also erst auf mehr Daten warten statt faelschlich als kurzes Frame
+    # zu interpretieren (Byte 2 waere sonst das vermeintliche Wert-Byte).
+    if buffer[2] == PULSE70_LONG_FRAME_MARKER_BYTE2:
+        if len(buffer) < PULSE70_LONG_FRAME_LEN:
+            return None, 0
+        if buffer[4] == PULSE70_LONG_FRAME_TAIL:
+            last_byte = buffer[3]
+            value = PULSE70_VALUE_CENT_BY_LAST_BYTE.get(last_byte)
+            return value, PULSE70_LONG_FRAME_LEN
+
+    # Kurzes 3-Byte-Frame: 70 <flag> <wert>
+    last_byte = buffer[2]
+    value = PULSE70_VALUE_CENT_BY_LAST_BYTE.get(last_byte)
+    return value, PULSE70_SHORT_FRAME_LEN
+
+
+def _emit_pulse70_coin(value_cent):
+    debug("Pulse70 emitting COIN:{}".format(value_cent))
+    # Ganz wichtig: NICHT aufsummieren.
+    usb_send("COIN:{}".format(value_cent))
+
+
 def _take_line_bytes(buffer):
     """
     Sucht das nächste Zeilenende (CR, LF oder CRLF) im Puffer.
@@ -334,6 +401,20 @@ def process_coin_uart(uart, buffer):
             buffer = buffer[HX916_FRAME_LEN:]
             debug("HX916 frame parsed, points={}".format(points))
             _emit_hx916_coin(points)
+            continue
+
+        if buffer[0] == PULSE70_MARKER:
+            value, consumed = _try_parse_pulse70_frame(buffer)
+            if consumed == 0:
+                debug("Pulse70 frame incomplete, buffer={}".format(buffer))
+                break  # Frame evtl. noch nicht vollständig eingetroffen
+            frame = buffer[:consumed]
+            buffer = buffer[consumed:]
+            if value is None:
+                debug("Pulse70 frame unknown value, frame={}".format(frame))
+            else:
+                debug("Pulse70 frame parsed, frame={}, value={}".format(frame, value))
+                _emit_pulse70_coin(value)
             continue
 
         raw_line, rest = _take_line_bytes(buffer)
